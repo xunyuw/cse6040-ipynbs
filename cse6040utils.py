@@ -90,6 +90,16 @@ def pandas2sqlite (df_reader, sql_writer, table_name, capitalize=False):
         sys.stdout.flush ()
     return index_start
 
+def peek_table (db, name):
+    """
+    [Lab 14] Given a database connection (`db`), prints both the number of
+    records in the table as well as its first few entries.
+    """
+    count = '''SELECT COUNT (*) FROM {table}'''.format (table=name)
+    display (pandas.read_sql_query (count, db))
+    peek = '''SELECT * FROM {table} LIMIT 5'''.format (table=name)
+    display (pandas.read_sql_query (peek, db))
+
 
 if __name__ == "__main__":
     print __doc__
