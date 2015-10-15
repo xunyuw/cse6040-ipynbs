@@ -70,6 +70,46 @@ def print_sparse_matrix (x):
         for j, value in row_i.items ():
             print ("[%s, %s]: %d" % (i, j, value))
 
+
+def dense_vector (n, init_val=0.0):
+    """
+    [Lab 14] Returns a dense vector of length `n`, with all
+    entries set to `init_val`.
+    """
+    return [init_val] * n
+
+def spmv (n, A, x):
+    """
+    [Lab 14] Returns a dense vector y of length n, where
+    y = A*x.
+    """
+    y = dense_vector (n)
+    for (i, A_i) in A.items ():
+        s = 0
+        for (j, a_ij) in A_i.items ():
+            s += a_ij * x[j]
+        y[i] = s
+    return y
+
+import math
+
+def vec_scale (x, alpha):
+    """[Lab 14] Scales the vector x by a constant alpha."""
+    return [x_i*alpha for x_i in x]
+
+def vec_add_scalar (x, c):
+    """[Lab 14] Adds the scalar value c to every element of x."""
+    return [x_i+c for x_i in x]
+
+def vec_sub (x, y):
+    """[Lab 14] Returns x - y"""
+    return [x_i - y_i for (x_i, y_i) in zip (x, y)]
+
+def vec_2norm (x):
+    """[Lab 14] Returns ||x||_2"""
+    return math.sqrt (sum ([x_i**2 for x_i in x]))
+
+
 import pandas as pd
 import sys
 
