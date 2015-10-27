@@ -141,6 +141,43 @@ def peek_table (db, name):
     display (pandas.read_sql_query (peek, db))
 
 
+# [Lab 21] Floating-point utilities
+# See also: https://docs.python.org/2/tutorial/floatingpoint.html
+import re
+
+RE_FLOAT_HEX_PARTS = re.compile (r'''^(?P<sign>-)?0x1\.(?P<mantissa>[0-9a-f]+)p(?P<signexp>[+-])(?P<exp>\d+)''')
+
+def float_to_bin (x):
+    """Given a `float`, returns its binary form as a string."""
+    assert type (x) is float
+    s_hex = float.hex (x)
+    hex_parts = RE_FLOAT_HEX_PARTS.match (s_hex)
+    assert hex_parts
+    
+    s = hex_parts.group ('sign')
+    m = hex_parts.group ('mantissa')
+    se = hex_parts.group ('signexp')
+    e = hex_parts.group ('exp')
+    
+    # Mantissa, including sign bit
+    # See also: http://stackoverflow.com/questions/1425493/convert-hex-to-binary
+    s_bin = '['
+    if s:
+        s_bin += s
+    s_bin += \
+        "1." \
+        + bin (int (m, 16))[2:].zfill (4 * len (m)) \
+        + "]_{2}"
+    
+    # Sign of exponent
+    s_bin += "e" + se
+    
+    # Exponent
+    s_bin += e
+
+    return s_bin
+
+
 if __name__ == "__main__":
     print __doc__
 
