@@ -144,6 +144,8 @@ def peek_table (db, name):
 # [Lab 21] Floating-point utilities
 # See also: https://docs.python.org/2/tutorial/floatingpoint.html
 import re
+from decimal import Decimal
+import numpy as np
 
 RE_FLOAT_HEX_PARTS = re.compile (r'''^(?P<sign>-)?0x1\.(?P<mantissa>[0-9a-f]+)p(?P<signexp>[+-])(?P<exp>\d+)''')
 
@@ -176,6 +178,19 @@ def float_to_bin (x):
     s_bin += e
 
     return s_bin
+
+# Copied here from Lab 21, for use starting in Lab 22 and beyond
+def print_float_bin (x, prefix="", ret=False):
+    s = ("%s: %s\n%s  %s" % (prefix,
+                             Decimal (x),
+                             ' ' * len (prefix),
+                             float_to_bin (x))) 
+    print (s)
+    if ret:
+        return s
+
+EPS_S = np.finfo (np.float32).eps
+EPS_D = np.finfo (float).eps
 
 
 if __name__ == "__main__":
