@@ -192,6 +192,142 @@ def print_float_bin (x, prefix="", ret=False):
 EPS_S = np.finfo (np.float32).eps
 EPS_D = np.finfo (float).eps
 
+# ======================================================================
+# [Lab 25] Logistic regression
+
+import plotly.plotly as py
+from plotly.graph_objs import *
+
+def assert_points_2d (points):
+    """Checks the dimensions of a given point set."""
+    assert type (points) is np.ndarray
+    assert points.ndim == 2
+    assert points.shape[1] == 3
+    
+def assert_labels (labels):
+    """Checks the type of a given set of labels (must be integral)."""
+    assert labels is not None
+    assert (type (labels) is np.ndarray) or (type (labels) is list)
+
+def extract_clusters (points, labels):
+    """
+    Given a list or array of labeled augmented points, this
+    routine returns a pair of lists, (C[0:k], L[0:k]), where
+    C[i] is an array of all points whose labels are L[i].
+    """
+    assert_points_2d (points)
+    assert_labels (labels)
+
+    id_label_pairs = list (enumerate (set (labels.flatten ())))
+    labels_map = dict ([(v, i) for (i, v) in id_label_pairs])
+    
+    # Count how many points belong to each cluster
+    counts = [0] * len (labels_map)
+    for l in labels.flatten ():
+        counts[labels_map[l]] += 1
+        
+    # Allocate space for each cluster
+    clusters = [np.zeros ((k, 3)) for k in counts]
+    
+    # Separate the points by cluster
+    counts = [0] * len (labels_map)
+    for (x, l) in zip (points, labels.flatten ()):
+        l_id = labels_map[l]
+        k = counts[l_id]
+        clusters[l_id][k, :] = x
+        counts[l_id] += 1
+        
+    # Generate cluster labels
+    cluster_labels = [None] * len (labels_map)
+    for (l, i) in labels_map.items ():
+        cluster_labels[i] = l
+        
+    return (clusters, cluster_labels)
+
+def make_2d_scatter_traces (points, labels=None):
+    """
+    Given an augmented point set, possibly labeled,
+    returns a list Plotly-compatible marker traces.
+    """
+    assert_points_2d (points)
+    
+    traces = []
+    if labels is None:
+        traces.append (Scatter (x=points[:, 1:2], y=points[:, 2:3], mode='markers'))
+    else:
+        assert_labels (labels)
+        (clusters, cluster_labels) = extract_clusters (points, labels)
+        for (c, l) in zip (clusters, cluster_labels):
+            traces.append (Scatter (x=c[:, 1:2], y=c[:, 2:3],
+                                    mode='markers',
+                                    name="%s" % str (l)))
+    return traces
+
+def heaviside_int (Y):
+    """Evaluates the heaviside function, but returns integer values."""
+    return heaviside (Y).astype (dtype=int)
+
+def assert_discriminant (theta, d=2):
+    """
+    Verifies that the given coefficients correspond to a
+    d-dimensional linear discriminant ($\theta$).
+    """
+    assert len (theta) == (d+1)
+
+def lin_discr (X, theta):
+    return X.dot (theta)
+
+def heaviside (Y):
+    return 1.0*(Y > 0.0)
+    
+def gen_lin_discr_labels (points, theta, fun=heaviside_int):
+    """
+    Given a set of points and the coefficients of a linear
+    discriminant, this function returns a set of labels for
+    the points with respect to this discriminant.
+    """
+    assert_points_2d (points)
+    assert_discriminant (theta)
+    
+    score = lin_discr (points, theta)
+    labels = fun (score)
+    return labels
+
+def gen_lin_discr_trace (points, theta, name='Discriminant'):
+    """
+    Given a set of points and the coefficients of a linear
+    discriminant, this function returns a set of Plotly
+    traces that show how the points are classified as well
+    as the location of the discriminant boundary.
+    """
+    assert_points_2d (points)
+    assert_discriminant (theta)
+    
+    x1 = [min (points[:, 1]), max (points[:, 1])]
+    m = -theta[1] / theta[2]
+    b = -theta[0] / theta[2]
+    x2 = [(b + m*x) for x in x1]
+        
+    return Scatter (x=x1, y=x2, mode='lines', name=name)
+
+def np_row_vec (init_list):
+    """Generates a Numpy-compatible row vector."""
+    return np.array (init_list, order='F', ndmin=2)
+
+def np_col_vec (init_list):
+    """Generates a Numpy-compatible column vector."""
+    return np_row_vec (init_list).T
+
+def check_labels (points, labels, fun):
+    """
+    Given a set of points and their labels, determines whether
+    a given function produces matching labels.
+    """
+    your_labels = fun (points)
+    return (labels == your_labels)
+
+def logistic (Y):
+    return 1.0 / (1.0 + np.exp (-Y))
 
 if __name__ == "__main__":
     print __doc__
