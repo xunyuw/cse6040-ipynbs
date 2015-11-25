@@ -147,7 +147,7 @@ import re
 from decimal import Decimal
 import numpy as np
 
-RE_FLOAT_HEX_PARTS = re.compile (r'''^(?P<sign>-)?0x1\.(?P<mantissa>[0-9a-f]+)p(?P<signexp>[+-])(?P<exp>\d+)''')
+RE_FLOAT_HEX_PARTS = re.compile (r'''^(?P<sign>-)?0x[01]\.(?P<mantissa>[0-9a-f]+)p(?P<signexp>[+-])(?P<exp>\d+)''')
 
 def float_to_bin (x):
     """Given a `float`, returns its binary form as a string."""
