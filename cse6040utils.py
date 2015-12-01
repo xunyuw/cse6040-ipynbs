@@ -166,8 +166,12 @@ def float_to_bin (x):
     s_bin = '['
     if s:
         s_bin += s
+    if (int (m, 16) == 0) and (int (e) == 0):
+        s_bin += "0"
+    else:
+        s_bin += "1"
     s_bin += \
-        "1." \
+        "." \
         + bin (int (m, 16))[2:].zfill (4 * len (m)) \
         + "]_{2}"
     
@@ -191,6 +195,41 @@ def print_float_bin (x, prefix="", ret=False):
 
 EPS_S = np.finfo (np.float32).eps
 EPS_D = np.finfo (float).eps
+
+# ======================================================================
+# [Lab 24] Linear regression
+
+def generate_model (d):
+    """Returns a set of (random) d+1 linear model coefficients."""
+    return np.random.rand (d+1, 1)
+
+def generate_data (m, x, sigma=1.0/(2**0.5)):
+    """
+    Generates 'm' noisy observations for a linear model whose
+    predictor (non-intercept) coefficients are given in 'x'.
+    Decrease 'sigma' to decrease the amount of noise.
+    """
+    assert (type (x) is np.ndarray) and (x.ndim == 2) and (x.shape[1] == 1)
+    n = len (x)
+    A = np.random.rand (m, n)
+    A[:, 0] = 1.0
+    b = A.dot (x) + sigma*np.random.randn (m, 1)
+    return (A, b)
+
+def linreg_fit_lstsq (A, b):
+    """
+    Solves Ax=b by a linear least squares method.
+    """
+    result = np.linalg.lstsq (A, b)
+    x = result[0]
+    return x
+
+def rel_diff (x, y, ord=2):
+    """
+    Computes ||x-y|| / ||y||. Uses 2-norm by default;
+    override by setting 'ord'.
+    """
+    return np.linalg.norm (x - y, ord=ord) / np.linalg.norm (y, ord=ord)
 
 # ======================================================================
 # [Lab 25] Logistic regression
