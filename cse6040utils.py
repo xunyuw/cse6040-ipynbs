@@ -5,7 +5,15 @@ Module: cse6040utils
 Some utility functions created for Georgia Tech's CSE 6040: Computing for Data Analysis.
 """
 
+#============================================================
 import itertools
+from IPython.display import display
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+#============================================================
+# From the early labs...
+#============================================================
 
 def keys_geq_threshold (Dict, threshold):
     """
@@ -499,7 +507,43 @@ def load_mnist (images_fn_gz, labels_fn_gz, digits=None, path=None, asbytes=Fals
     else:
         return ret
 
+#============================================================
+# [Labs 29 & 30] PCA + SVD
+#============================================================
+
+def peek_Sigma (Sigma, ret_df=False):
+    k = len (Sigma)
+    df_Sigma = pd.DataFrame (np.arange (len (Sigma)), columns=['i'])
+    df_Sigma['sigma_i'] = Sigma
+    Sigma_sq = np.power (Sigma, 2)
+    Err_sq = np.sum (Sigma_sq) - np.cumsum (Sigma_sq)
+    Err_sq[Err_sq < 0] = 0
+    Err = np.sqrt (Err_sq)
+    Relerr = Err / (Sigma[0] + Err[0])
+    df_Sigma['sigma_i^2'] = Sigma_sq
+    df_Sigma['err_i^2'] = Err_sq
+    df_Sigma['err_i'] = Err
+    df_Sigma['relerr_i'] = Relerr
+    print "Singular values:"
+    display (df_Sigma.head ())
+    print "  ..."
+    display (df_Sigma.tail ())
+    
+    f, ax = plt.subplots (figsize=(7, 7))
+    ax.set (yscale="log")
+    sns.regplot ("i", "sigma_i", df_Sigma, ax=ax, fit_reg=False)
+    if ret_df:
+        return df_Sigma
+
+def rgb2gray (rgb):
+    return np.dot (rgb[...,:3], [0.299, 0.587, 0.144])
+
+def imshow_gray (im):
+    plt.imshow (im, interpolation='nearest', cmap=plt.get_cmap ('gray'))
+
+#============================================================
 if __name__ == "__main__":
     print __doc__
+#============================================================
 
 # eof
